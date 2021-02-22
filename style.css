@@ -306,6 +306,8 @@ pre {
 
 #carousel-1 .carousel-inner {
   border-radius: inherit;
+  overflow: hidden;
+  z-index: 1;
 }
 
 #carousel-1 .carousel-indicators {
