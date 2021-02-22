@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="google" value="notranslate">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
+  <title> - </title>
+</head>
+
+
+<body class="preload">
+  <header id="primary-header">
+    <nav id="primary-navbar" class="navbar navbar-expand-sm navbar-dark">
+      <div class="container-fluid">
+        <a id="brand" class="navbar-brand" href="#!">Carousel Demo (No bootstrap.js)</a>
+      </div>
+    </nav>
+  </header>
+
+
+  <!--  ========================================================================
+                                    main
+  ========================================================================== -->
+
+
+  <main class="py-5">
+    <div class="container-fluid px-md-5">
+
+      <article class="article">
+        <h2 class="text-white-3d">Overview:</h2>
+
+
+        <div id="carousel-1" class="carousel slide" style="margin-bottom: 75px;">
+
+          <div class="carousel-indicators">
+            <button class="active" type="button" data-target="#carousel-1" data-slide-to="0"></button>
+            <button                type="button" data-target="#carousel-1" data-slide-to="1"></button>
+            <button                type="button" data-target="#carousel-1" data-slide-to="2"></button>
+          </div>
+
+
+          <div class="carousel-inner ratio ratio-16x9">
+            <div class="carousel-item active">
+              <img src="assets/images/3x1.jpg" alt="">
+              <div class="carousel-caption d-none d-md-block">Slide 1</div>
+            </div>
+
+
+            <div class="carousel-item">
+              <img src="assets/images/lois.jpg" alt="">
+              <div class="carousel-caption d-none d-md-block">Slide 2</div>
+            </div>
+
+
+            <div class="carousel-item">
+              <img src="assets/images/herbert.jpg" alt="">
+              <div class="carousel-caption d-none d-md-block">Slide 3</div>
+            </div>
+          </div><!-- <div class="carousel-inner"> -->
+
+
+          <button class="carousel-control-prev" type="button" data-target="#carousel-1">
+            <span class="carousel-control-prev-icon"></span>
+            <span class="visually-hidden">Previous</span>
+          </button>
+
+          <button class="carousel-control-next" type="button" data-target="#carousel-1">
+            <span class="carousel-control-next-icon"></span>
+            <span class="visually-hidden">Next</span>
+          </button>
+        </div>
+
+
+        <div class="horizontal-ruler">
+          <hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/>
+          <hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/>
+          <hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/><hr/>
+        </div>
+
+
+        <p><strong>Note:</strong> Like Bootstrap, this implementation uses
+        <code>data-*</code> attributes. However, they have been changed such that the <code>-bs-</code>
+        namespace has been removed. Thus, it will not work directly with Bootstrap
+        data attribute unless you tweak the code in <code>Carousel.js</code>.
+        This also means that if you intend to use the default styles that you have
+        to add the following selectors:</p>
+
+
+        <pre><code>
+  .carousel-indicators [<span style="color:violet">data-target</span>] {
+    box-sizing: content-box;
+    flex: 0 1 auto;
+    width: 30px;
+    height: 3px;
+    padding: 0;
+    margin-right: 3px;
+    margin-left: 3px;
+    text-indent: -999px;
+    cursor: pointer;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    opacity: 0.5;
+    transition: opacity 0.6s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .carousel-indicators [<span style="color:violet">data-target</span>] {
+      transition: none;
+    }
+  }
+
+  .carousel-dark .carousel-indicators [<span style="color:violet">data-target</span>] {
+    background-color: #000;
+  }
+
+  /* rewrite */
+  .carousel-indicators .active {
+    opacity: 1;
+  }
+        </code></pre>
+
+
+
+        <p>The goal for this demo
+        was to create a working carousel using bootstrap.css. However, it's likely that
+        if this code was ever used it would actually be without bootstrap.js.
+        Consequently, it doesn't make sense to use the <code>-bs-</code> namespace.
+        Also, it's important to note that this project was built with <code>bootstrap@5.0.0-beta2</code>.
+        Currently, the CSS styles are built on top of that stylesheet. However, if you
+        wanted to make it completely independent of Bootstrap you would need to abstract
+        the carousel-related CSS from bootstrap.css</p>
+
+      </article>
+    </div><!-- <div class="container"> -->
+  </main>
+
+
+  <!--  ========================================================================
+
+  ========================================================================== -->
+
+
+  <script src="js/Carousel.js"></script>
+  <script src="js/script.js"></script>
+</body>
+</html>
