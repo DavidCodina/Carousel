@@ -1,30 +1,34 @@
 function Carousel(selector, config){
-  this._config               = config || {};
-  this._carousel             = document.querySelector(selector);
-  this._items                = this._carousel.querySelectorAll('.carousel-item');
-  this._prevControls         = document.querySelectorAll('.carousel-control-prev[data-target="#' + this._carousel.id + '"]');
-  this._nextControls         = document.querySelectorAll('.carousel-control-next[data-target="#' + this._carousel.id + '"]');
-  this._indicators           = document.querySelectorAll('.carousel-indicators [data-target="#'  + this._carousel.id + '"]');
-  this._activeItem           = this._carousel.querySelector('.carousel-item.active');
-  this._setActiveIndex       = this._setActiveIndex.bind(this); // early binding
-  this._activeIndex          = this._setActiveIndex();
-  this._isTransitioning      = false;
-  this._slideInterval        = null;
-  this._slideIntervalTime    = (this._config.hasOwnProperty('slideIntervalTime')) ? this._config.slideIntervalTime : null;
+  this._config                     = config || {};
+  this._carousel                   = document.querySelector(selector);
+  this._items                      = this._carousel.querySelectorAll('.carousel-item');
+  this._prevControls               = document.querySelectorAll('.carousel-control-prev[data-target="#' + this._carousel.id + '"]');
+  this._nextControls               = document.querySelectorAll('.carousel-control-next[data-target="#' + this._carousel.id + '"]');
+  this._indicators                 = document.querySelectorAll('.carousel-indicators [data-target="#'  + this._carousel.id + '"]');
+  this._playPauseButtons           = document.querySelectorAll('.play-pause-button[data-target="#'     + this._carousel.id + '"]');
+  this._activeItem                 = this._carousel.querySelector('.carousel-item.active');
+  this._setActiveIndex             = this._setActiveIndex.bind(this); // early binding
+  this._activeIndex                = this._setActiveIndex();
+  this._isTransitioning            = false;
+  this._slideInterval              = null;
+  this._shouldPlay                 = (this._config.hasOwnProperty('shouldPlay')) ? config.shouldPlay : false;
+  this._isPlaying                  = false;
+  this._slideIntervalTime          = (this._config.hasOwnProperty('slideIntervalTime')) ? this._config.slideIntervalTime : 3000;
+  this._shouldStopOnHover          = (this._config.hasOwnProperty('shouldStopOnHover')) ? this._config.shouldStopOnHover : true;
+  this._init                       = this._init.bind(this);
+  this.prev                        = this.prev.bind(this);
+  this.next                        = this.next.bind(this);
+  this._updateIndicators           = this._updateIndicators.bind(this);
+  this._handleIndicatorClick       = this._handleIndicatorClick.bind(this);
+  this.play                        = this.play.bind(this);
+  this.pause                       = this.pause.bind(this);
+  this._handlePlayPauseButtonClick = this._handlePlayPauseButtonClick.bind(this);
+  this._updatePlayPauseButtons     = this._updatePlayPauseButtons.bind(this);
+  this._handleMouseEnter           = this._handleMouseEnter.bind(this);
+  this._handleMouseLeave           = this._handleMouseLeave.bind(this);
+  this.destroy                     = this.destroy.bind(this);
 
-  if (this._slideIntervalTime !== null && this._slideIntervaltime <= 600){ this._slideIntervalTime = 1000; }
-
-  this._init                 = this._init.bind(this);
-  this.prev                  = this.prev.bind(this);
-  this.next                  = this.next.bind(this);
-  this._updateIndicator      = this._updateIndicator.bind(this);
-  this._handleIndicatorClick = this._handleIndicatorClick.bind(this);
-  this.start                 = this.start.bind(this);
-  this.pause                 = this.pause.bind(this);
-  this._handleMouseEnter     = this._handleMouseEnter.bind(this);
-  this._handleMouseLeave     = this._handleMouseLeave.bind(this);
-  this.destroy               = this.destroy.bind(this);
-
+  if (this._slideIntervaltime <= 600){ this._slideIntervalTime = 1000; }
   this._init();
   return this;
 }
@@ -45,25 +49,44 @@ Carousel.prototype._init = function(){
     const indicator = this._indicators[i];
     indicator.addEventListener('click', this._handleIndicatorClick);
   }
-  if (this._slideIntervalTime){
+
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  //  Do not implement hover feature if there is a play/pause button.
+  //  Having both systems in place could be confusing to the user. That said, one could still have
+  //  buttons that run play() and pause, just don't give them the .play-pause-button class.
+  //
+  //////////////////////////////////////////////////////////////////////////////
+
+  if (this._playPauseButtons.length === 0 && this._shouldPlay && this._shouldStopOnHover){
     this._carousel.addEventListener('mouseenter', this._handleMouseEnter);
     this._carousel.addEventListener('mouseleave', this._handleMouseLeave);
-    // Wait a couple of seconds just in case transitions are initially disabled by some other code.
-    setTimeout(function(){ this.start(); }.bind(this), 2000);
   }
+
+  // Wait two seconds just in case transitions are initially disabled by some other code.
+  // The timeout value may need to be modified for specific use cases in which transitions are disabled for longer.
+  setTimeout(function(){
+    // Prevent user from clicking until 2 seconds have elapsed.
+    for (let i = 0; i < this._playPauseButtons.length; i++){
+      const playPauseButton = this._playPauseButtons[i];
+      playPauseButton.addEventListener('click', this._handlePlayPauseButtonClick);
+    }
+
+    if (this._shouldPlay){ this.play(); }
+  }.bind(this), 2000);
 };
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //
 //  Find the index of the current .carousel-item.active, then return it to this._activeIndex.
-//  If no .carousel-item.active is found then set the '.active' class on the first item,
+//  If no .carousel-item.active is found, then set the '.active' class on the first item,
 //  and return 0 to this._activeIndex. If there are indicators and for some reason
 //  there is no '.active' on an indicator, it will update automatically after the
 //  initial slide.
 //
-//  Note: this method is only used in the constructor.
-//  Updating _activeIndex is subsequently done internally without reaching into the DOM.
+//  Note: this method is only used in the constructor. Updating _activeIndex is
+//  subsequently done internally without reaching into the DOM.
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -99,7 +122,7 @@ Carousel.prototype.prev = function(e){
 
   this._activeItem  = prevItem;
   this._activeIndex = ((this._activeIndex - 1) < 0) ? this._items.length-1 : this._activeIndex - 1;
-  this._updateIndicator();
+  this._updateIndicators();
 
   setTimeout(function(){
     prevItem.classList.remove('carousel-item-prev');
@@ -130,7 +153,7 @@ Carousel.prototype.next = function(e){
 
   this._activeItem  = nextItem;
   this._activeIndex = (this._activeIndex + 1) % this._items.length;
-  this._updateIndicator();
+  this._updateIndicators();
 
   setTimeout(function(){
     nextItem.classList.remove('carousel-item-next');
@@ -145,24 +168,26 @@ Carousel.prototype.next = function(e){
 
 
 
-// Called in prev() and next() to update indicators.
-Carousel.prototype._updateIndicator = function(){
+
+Carousel.prototype._updateIndicators = function(){
   if (this._indicators === null || typeof this._indicators === 'undefined' || this._indicators.length === 0){ return; }
+
   for (let i = 0; i < this._indicators.length; i++){
-    const indicator = this._indicators[i];
-    if (indicator.classList.contains('active')){
+    const indicator    = this._indicators[i];
+    const slideToIndex = parseInt(indicator.getAttribute('data-slide-to'));
+    if (indicator.classList.contains('active') && slideToIndex !== this._activeIndex){
       indicator.classList.remove('active');
-      break;
+    } else if (slideToIndex === this._activeIndex){
+      indicator.classList.add('active');
     }
   }
-  this._indicators[this._activeIndex].classList.add('active');
 };
 
 
 
 
 Carousel.prototype._handleIndicatorClick = function(e){
-  if (e){ e.preventDefault();          } // There should ALWAYS be an e in this case.
+  if (e){ e.preventDefault();          }
   if (this._isTransitioning){ return;  }
   else { this._isTransitioning = true; }
 
@@ -177,7 +202,6 @@ Carousel.prototype._handleIndicatorClick = function(e){
   const shouldSlideForward = (slideToIndex  >  this._activeIndex) ? true : false;
   const shouldSlideBack    = (slideToIndex  <  this._activeIndex) ? true : false;
 
-
   if (shouldDoNothing){
     this._isTransitioning = false;
   }
@@ -190,7 +214,7 @@ Carousel.prototype._handleIndicatorClick = function(e){
 
     this._activeItem  = nextItem;
     this._activeIndex = slideToIndex;
-    this._updateIndicator();
+    this._updateIndicators();
 
     setTimeout(function(){
       nextItem.classList.remove('carousel-item-next');
@@ -210,7 +234,7 @@ Carousel.prototype._handleIndicatorClick = function(e){
 
     this._activeItem  = prevItem;
     this._activeIndex = slideToIndex;
-    this._updateIndicator();
+    this._updateIndicators();
 
     setTimeout(function(){
       prevItem.classList.remove('carousel-item-prev');
@@ -226,8 +250,33 @@ Carousel.prototype._handleIndicatorClick = function(e){
 
 
 
-Carousel.prototype.start = function(){
+Carousel.prototype._updatePlayPauseButtons = function(){
+  if (this._playPauseButtons.length === 0){ return; }
+
+  for (let i = 0; i < this._playPauseButtons.length; i++){
+    const playPauseButton = this._playPauseButtons[i];
+    const playElement     = playPauseButton.querySelector('.play-element');
+    const pauseElement    = playPauseButton.querySelector('.pause-element');
+    if (!playElement || !pauseElement){ continue; }
+
+    if (this._isPlaying){
+      playElement.style.display  = 'none';
+      pauseElement.style.display = 'block';
+    } else {
+      pauseElement.style.display = 'none';
+      playElement.style.display  = 'block';
+    }
+  }
+};
+
+
+
+
+Carousel.prototype.play = function(){
+  clearInterval(this._slideInterval);
   this._slideInterval = setInterval(this.next, this._slideIntervalTime);
+  this._isPlaying = true;
+  this._updatePlayPauseButtons();
   return this;
 };
 
@@ -236,22 +285,32 @@ Carousel.prototype.start = function(){
 
 Carousel.prototype.pause = function(){
   clearInterval(this._slideInterval);
+  this._isPlaying = false;
+  this._updatePlayPauseButtons();
   return this;
 };
 
 
 
 
+Carousel.prototype._handlePlayPauseButtonClick = function(e){
+  if (e){ e.preventDefault();               }
+  if      (this._isPlaying){  this.pause(); }
+  else if (!this._isPlaying){ this.play();  }
+};
+
+
+
+
 Carousel.prototype._handleMouseEnter = function(){
-  console.log("MouseEnter");
-  if (this._slideIntervalTime){ this.pause(); }
+  this.pause();
 };
 
 
 
 
 Carousel.prototype._handleMouseLeave = function(){
-  if (this._slideIntervalTime){ this.start(); }
+  this.play();
 };
 
 
@@ -269,6 +328,10 @@ Carousel.prototype.destroy = function(){
   for (let i = 0; i < this._indicators.length; i++){
     const indicator = this._indicators[i];
     indicator.removeEventListener('click', this._handleIndicatorClick);
+  }
+  for (let i = 0; i < this._playPauseButtons.length; i++){
+    const playPauseButton = this._playPauseButtons[i];
+    playPauseButton.removeEventListener('click', this._handlePlayPauseButtonClick);
   }
   this.pause(); // i.e,. clearInterval(this._slideInterval);
   this._carousel.removeEventListener('mouseenter', this._handleMouseEnter);

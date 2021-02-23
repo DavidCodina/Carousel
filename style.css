@@ -36,7 +36,7 @@ figure {
 pre {
   width: 90%;
   margin: 0 auto 50px auto;
-  font-size: 16px;
+  font-size: 14px;
   color: #333;
   background-color: rgb(255,255,255);
   border: 2px solid #333;
@@ -290,6 +290,43 @@ pre {
   max-height: 100%;
 }
 
+/* Change as needed. */
+.play-pause-button {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 25px;
+  margin: 0;
+  padding: 0;
+  cursor:pointer;
+  background-color:transparent;
+  border:none;
+  line-height: 1;
+  z-index: 2;
+}
+
+/* By default the play element will show.
+If shouldPlay is set to true, it will be hidden. */
+.play-pause-button .play-element {
+}
+
+.play-pause-button .pause-element {
+  display:none;
+}
+
+.play-pause-button img {
+  width: 100%;
+  cursor:pointer;
+}
+
+.play-pause-button:hover,
+.play-pause-button:focus,
+.play-pause-button:active {
+  border: none;
+  outline:none;
+  box-shadow:none;
+}
+
 
 /* =============================================================================
 
@@ -299,7 +336,6 @@ pre {
 #carousel-1 {
   max-width: 500px;
   margin: 0 auto 50px auto;
-  background-color: #333;
   border: 2px solid black;
   border-radius: 25px;
 }
